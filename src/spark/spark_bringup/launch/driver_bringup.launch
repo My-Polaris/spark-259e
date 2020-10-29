@@ -1,0 +1,13 @@
+<!-- -->
+<launch>
+  <arg name="serialport" default="/dev/sparkBase"/>
+  <arg name="camera_types" default="" doc="camera type [astrapro, astra]"/>
+
+  <include file="$(find spark_description)/launch/spark_description.launch"/>
+  <include file="$(find spark_base)/launch/spark_base.launch">
+	<arg name="serialport"                  value="$(arg serialport)"/>
+  </include>
+
+  <include file="$(find astra_camera)/launch/$(arg camera_types).launch" />
+
+</launch>
