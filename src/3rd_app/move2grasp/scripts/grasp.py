@@ -278,12 +278,24 @@ class GraspObject():
                     frame = cv2.putText(frame,str_A, (box[1][0],box[1][1]+20), cv2.FONT_HERSHEY_COMPLEX, 0.3, (0, 255, 255), 1)
                     frame = cv2.putText(frame,str_D, (box[3][0],box[3][1]+30), cv2.FONT_HERSHEY_COMPLEX, 0.3, (0, 255, 255), 1)
 
+                    #画四个点
+                    #cv2.circle(frame, (np.int32(box[0][0]), np.int32(box[0][1])), 2, (255, 233, 0), 2, 8, 0)
+                    #cv2.circle(frame, (np.int32(box[1][0]), np.int32(box[1][1])), 2, (255, 233, 0), 2, 8, 0)
+                    #cv2.circle(frame, (np.int32(box[2][0]), np.int32(box[2][1])), 2, (255, 233, 0), 2, 8, 0)
+                    #cv2.circle(frame, (np.int32(box[3][0]), np.int32(box[3][1])), 2, (255, 233, 0), 2, 8, 0)                    
+                    
                     if distance_list[-1] < max_distance and distance_list[-1]<min_distance:
+                        #修改微调值
+                        x_re = 0 
+                        y_re = 0 
+                        if size[-1]>20000 :
+                            x_re = int(w/8)
+                            y_re = int(h/16)
                         size_max = size[-1]
                         min_distance = distance_list[-1]
                         index = len(distance_list) -1 
-                        xc = x_mid
-                        yc = y_mid
+                        xc = x_mid+x_re
+                        yc = y_mid+y_re
                         cv2.circle(frame, (np.int32(xc), np.int32(yc)), 2, (255, 0, 0), 2, 8, 0)
 
                     
