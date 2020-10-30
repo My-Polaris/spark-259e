@@ -9,7 +9,7 @@ import roslib
 import rospy
 import smach
 import smach_ros
-import threading#python实现多线程编程需要借助于threading模块
+import threading
 import thread
 import string
 import math
@@ -28,7 +28,7 @@ class GraspObject():
     监听主控，用于物品抓取功能
     '''
 
-    def __init__(self):#self是传进来的结点名,即'GraspObject'
+    def __init__(self):
         '''
         初始化
         '''
@@ -38,11 +38,11 @@ class GraspObject():
         yc = 0
         xc_prev = xc
         yc_prev = yc
-        found_count = 0 #找到的数量
-        detect_color_blue=False #是否找到蓝色
+        found_count = 0
+        detect_color_blue=False
         self.is_found_object = False
         # self.sub = rospy.Subscriber("/camera/rgb/image_raw", Image, self.image_cb, queue_size=1)
-        thread1 = threading.Thread(target=self.image_cb,)#创建Thread对象,每个Thread对象代表一个线程
+        thread1 = threading.Thread(target=self.image_cb,)
         thread1.setDaemon(True)
         thread1.start()
         # 订阅机械臂抓取指令
@@ -66,7 +66,6 @@ class GraspObject():
         pos.z = 35
         self.pub1.publish(pos)
 
-    # 收到抓取指令之后进入的回调函数,我们的所有复位,放物体都是发布的'/grasp'话题
     def grasp_cp(self, msg):
         global detect_color_blue
         rospy.loginfo("recvice grasp command:%s",msg.data)
@@ -102,9 +101,9 @@ class GraspObject():
             self.grasp()
             status=String()
             status.data='1'
-            self.grasp_status_pub.publish(status)
-        # 放下物体
+            self.grasp_status_pub.publish(status) 
         if msg.data=='0':
+            # 放下物体
             self.is_found_object = False
             detect_color_blue=False
             self.release_object()
@@ -112,8 +111,9 @@ class GraspObject():
             status.data='0'
             
             self.grasp_status_pub.publish(status)
-        # 丢下物体
+        #xin jia de
         if msg.data=='2':
+            # 放下物体
             self.is_found_object = False
             detect_color_blue=False
             self.release_object_2()
@@ -121,8 +121,9 @@ class GraspObject():
             status.data='0'
             
             self.grasp_status_pub.publish(status)
-        # 机械臂复位
+        #xin jia de 2
         if msg.data=='3':
+            # 机械臂恢复
             status = SwiftProStatus()
             status_pub = rospy.Publisher('/swiftpro_status_topic',SwiftProStatus,queue_size=1)
             rate = rospy.Rate(5)
@@ -136,13 +137,6 @@ class GraspObject():
             pos.x = 120
             pos.y = 0
             pos.z = 35
-            self.pub1.publish(pos)
-        # 扫物块模式,x是远近(越远数值越大),y是左右(左正右负),z是高度(越高数值越大)
-        if msg.data=='4':
-            pos = position()
-            pos.x = 160
-            pos.y = 208
-            pos.z = -118
             self.pub1.publish(pos)
 
     # 执行抓取
@@ -226,53 +220,72 @@ class GraspObject():
             # time.sleep(0.08)
             ret,frame = capture.read()
             cv_image2 = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-            mask = cv2.inRange(cv_image2, LowerBlue, UpperBlue)		
-            mask = cv2.erode(mask, None, iterations=5)
+            mask = cv2.inRange(cv_image2, LowerBlue, UpperBlue)	    #第一个参数是原图 第二个是低于lower_blue的值 第三个是高于upper_blue的值  该函数将之间的所有颜色都去掉只识别在该范围类的颜色	
+            mask = cv2.erode(mask, None, iterations=5)              #使图像加上高斯模糊使图像色彩更加突出，色彩追终更加准确
             #mask = cv2.dilate(mask, None, iterations=2)
-            mask = cv2.GaussianBlur(mask, (9,9), 0)
+            mask = cv2.GaussianBlur(mask, (9,9), 0)                 #该函数用于图像的减噪过程
             # detect contour
-            cv2.imshow("win2", mask)
-            cv2.waitKey(1)
-            if detect_color_blue :
-                _, contours, hier = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-                if len(contours) > 0:
-                    size = []
-                    size_max = 0
-                    distance_list = []
-                    max_distance = 450
-                    for i, c in enumerate(contours):
-                        rect = cv2.minAreaRect(c)
-                        box = cv2.boxPoints(rect)
-                        box = np.int0(box)
-                        x_mid, y_mid = rect[0]
+            cv2.imshow("win2", mask)                                #将去掉颜色的图像显示在win2这个窗口上
+            cv2.waitKey(1)                                          #功能是不断的刷新win2这个窗口，频率为delay
+            #if detect_color_blue :                                  #这个布尔变量表示 是否探测到符合的蓝色    
+            _, contours, hier = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)      #第一个参数是带有参数的图像 第二个参数cv2.RETR_TREE是提取轮廓信息 第三个参数是指定轮廓的近似方法 
+            if len(contours) > 0:    #len计算contour里面的元素个数                                    #第一个返回值 _是二值图（这里没用到） 第二个值counters是一个列表每个元素是（x,1,2）x是每个元素的边缘像素点的多少                    
+                size = []                                                                           # 1 不知道什么意思 ， 2文档上说的是代表每个点的横纵坐标                        
+                size_max = 0
+                distance_list = []
+                max_distance = 450      #定义一个最远距离 
+                min_distance = 450      #定义一个最远距离   
 
-                        w = math.sqrt((box[0][0] - box[1][0])**2 + (box[0][1] - box[1][1])**2)
-                        h = math.sqrt((box[0][0] - box[3][0])**2 + (box[0][1] - box[3][1])**2)
+                for i, c in enumerate(contours):    #enumerate枚举的意思 将contours里的各个元素都提取出来
+                    rect = cv2.minAreaRect(c)       #生成最小的外接矩阵里面包含该矩阵的中心点坐标，高度，宽度等信息
+                    box = cv2.boxPoints(rect)       #获取生成的最小矩阵的四个顶点坐标
+                    box = np.int0(box)              
+                    x_mid, y_mid = rect[0]
 
-                        size.append(w * h)
-                        # 所有点到spark的距离
-                        distance_list.append(math.sqrt((320 - x_mid) ** 2 + (300 - y_mid) ** 2))
+                    w = math.sqrt((box[0][0] - box[1][0])**2 + (box[0][1] - box[1][1])**2)      #因为矩形的边并不是平行或者垂直于屏幕的于是要通过一系列的计算算出
+                    h = math.sqrt((box[0][0] - box[3][0])**2 + (box[0][1] - box[3][1])**2)      #该外接矩形的长和宽
+                    if int(w*h) < 10000 :
+                        continue 
+                    
+                    size.append(w * h)        #将外接矩阵的面积放入这个列表之中                        
+                    # 所有点到spark的距离
+                    distance_list.append(math.sqrt((320 - x_mid) ** 2 + (300 - y_mid) ** 2))
 
-                        if size[i] > size_max and distance_list[i] < max_distance:
-                            size_max = size[i]
-                            min_distance = distance_list[i]
-                            index = i
-                            xc = x_mid
-                            yc = y_mid
-                            cv2.circle(frame, (np.int32(xc), np.int32(yc)), 2, (255, 0, 0), 2, 8, 0)
-                    if found_count >= 15 and min_distance < 350:
-                        self.is_found_object = True
-                        cmd_vel = Twist()
-                        self.cmd_vel_pub.publish(cmd_vel)
-                    else:
-                        # if box is not moving
-                        if abs(xc - xc_prev) <= 50 and abs(yc - yc_prev) <= 50 and yc > 150 and yc < 370 and xc > 100 and xc < 540:
-                            found_count = found_count + 1
-                        else:
-                            found_count = 0
+                    #信息
+                    str_x = "x_mid: "+str(int(x_mid))
+                    str_y = "y_mid: "+str(int(y_mid))
+                    str_A = "Area: "+str(int(w*h))
+                    str_D = "dist: "+str(int(math.sqrt((320 - x_mid) ** 2 + (300 - y_mid) ** 2)))
+                    #画图                    
+                    frame = cv2.drawContours(frame,[contours[i]],0,(0,255,0),3)
+                    frame = cv2.putText(frame,str_x, (box[3][0],box[3][1]), cv2.FONT_HERSHEY_COMPLEX, 0.3, (0, 255, 255), 1)
+                    frame = cv2.putText(frame,str_y, (box[3][0],box[3][1]+10), cv2.FONT_HERSHEY_COMPLEX,0.3, (0, 255, 255), 1)
+                    frame = cv2.putText(frame,str_A, (box[3][0],box[3][1]+20), cv2.FONT_HERSHEY_COMPLEX, 0.3, (0, 255, 255), 1)
+                    frame = cv2.putText(frame,str_D, (box[3][0],box[3][1]+30), cv2.FONT_HERSHEY_COMPLEX, 0.3, (0, 255, 255), 1)
 
+                    if distance_list[-1] < max_distance and distance_list[-1]<min_distance:
+                        size_max = size[-1]
+                        min_distance = distance_list[-1]
+                        index = len(distance_list) -1 
+                        xc = x_mid
+                        yc = y_mid
+                        cv2.circle(frame, (np.int32(xc), np.int32(yc)), 2, (255, 0, 0), 2, 8, 0)
+
+                    
+                if found_count >= 15 and min_distance < 350:
+                    self.is_found_object = True
+                    #cmd_vel = Twist()
+                    cv2.circle(frame, (np.int32(xc), np.int32(yc)), 3, (0,0,255), -1)      #将目标点显示出来
+                    #self.cmd_vel_pub.publish(cmd_vel)
                 else:
-                    found_count = 0
+                    # if box is not moving
+                    if abs(xc - xc_prev) <= 50 and abs(yc - yc_prev) <= 50 and yc > 150 and yc < 370 and xc > 100 and xc < 540:
+                        found_count = found_count + 1
+                    else:
+                        found_count = 0
+
+            else:
+                found_count = 0
             xc_prev = xc
             yc_prev = yc
             cv2.imshow("win1", frame)
@@ -302,7 +315,7 @@ class GraspObject():
         r1.sleep()
         return 'succeeded'
 
-    # 释放物体2
+    # 释放物体
     def release_object_2(self):
         r1 = rospy.Rate(1)  # 5s
         r2 = rospy.Rate(1)     # 1s
@@ -338,7 +351,7 @@ class GraspObject():
         
 if __name__ == '__main__':
     try:
-        rospy.init_node('GraspObject', anonymous=False)#匿名
+        rospy.init_node('GraspObject', anonymous=False)
         rospy.loginfo("Init GraspObject main")   
         GraspObject()
         rospy.spin()

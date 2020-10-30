@@ -26,21 +26,21 @@
   	</include>
 
   	<!-- SLAM: Gmapping, Cartographer, Hector, Karto, Frontier_exploration-->
-  	<include file="$(find spark_slam)/launch/spark_$(arg slam_methods).launch">
+  	<!--<include file="$(find spark_slam)/launch/spark_$(arg slam_methods).launch">
     		<arg name="configuration_basename" value="$(arg configuration_basename)"/>
-  	</include>
+  	</include>-->
 
   	<!-- Move base -->
-  	<arg name="custom_param_file" default="$(find spark_navigation)/param/$(arg 3d_sensor)_costmap_params.yaml"/>
+  	<!--<arg name="custom_param_file" default="$(find spark_navigation)/param/$(arg 3d_sensor)_costmap_params.yaml"/>
   	<include file="$(find spark_navigation)/launch/includes/move_base.launch.xml">
     		<arg name="custom_param_file" value="$(arg custom_param_file)"/>
-  	</include>
+  	</include>-->
 
 
   	<!-- rviz -->
-  	<group if="$(arg open_rviz)"> 
+  	<!--<group if="$(arg open_rviz)"> 
     		<node pkg="rviz" type="rviz" name="rviz" required="true" args="-d $(find move2grasp)/rviz/spark_$(arg slam_methods).rviz"/>
-  	</group>
+  	</group>-->
 
 
         <node pkg="move2grasp" type="teleop.py" name="teleop" launch-prefix="xterm -e" />
