@@ -106,7 +106,7 @@ def keyboardLoop():
             msg.data='4'
             grasp_pub.publish(msg)
         #右扫物块模式,对应data为5
-        elif ch == 'c':
+        elif ch == 'v':
             msg=String()
             msg.data='5'
             grasp_pub.publish(msg)
