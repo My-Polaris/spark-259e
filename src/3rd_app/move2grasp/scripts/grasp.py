@@ -111,7 +111,7 @@ class GraspObject():
             status.data='0'
             
             self.grasp_status_pub.publish(status)
-        #xin jia de
+        # 丢下物块
         if msg.data=='2':
             # 放下物体
             self.is_found_object = False
@@ -121,7 +121,7 @@ class GraspObject():
             status.data='0'
             
             self.grasp_status_pub.publish(status)
-        #xin jia de 2
+        # 机械臂复位
         if msg.data=='3':
             # 机械臂恢复
             status = SwiftProStatus()
@@ -137,6 +137,21 @@ class GraspObject():
             pos.x = 120
             pos.y = 0
             pos.z = 35
+            self.pub1.publish(pos)
+        # 扫物块模式,x是远近(越远数值越大),y是左右(左正右负),z是高度(越高数值越大)
+        if msg.data=='4':
+            #左扫
+            pos = position()
+            pos.x = 160
+            pos.y = 208
+            pos.z = -118
+            self.pub1.publish(pos)
+        if msg.data=='5':
+            #右扫
+            pos = position()
+            pos.x = 160
+            pos.y = -208
+            pos.z = -118
             self.pub1.publish(pos)
 
     # 执行抓取
@@ -260,7 +275,7 @@ class GraspObject():
                     frame = cv2.drawContours(frame,[contours[i]],0,(0,255,0),3)
                     frame = cv2.putText(frame,str_x, (box[3][0],box[3][1]), cv2.FONT_HERSHEY_COMPLEX, 0.3, (0, 255, 255), 1)
                     frame = cv2.putText(frame,str_y, (box[3][0],box[3][1]+10), cv2.FONT_HERSHEY_COMPLEX,0.3, (0, 255, 255), 1)
-                    frame = cv2.putText(frame,str_A, (box[3][0],box[3][1]+20), cv2.FONT_HERSHEY_COMPLEX, 0.3, (0, 255, 255), 1)
+                    frame = cv2.putText(frame,str_A, (box[1][0],box[1][1]+20), cv2.FONT_HERSHEY_COMPLEX, 0.3, (0, 255, 255), 1)
                     frame = cv2.putText(frame,str_D, (box[3][0],box[3][1]+30), cv2.FONT_HERSHEY_COMPLEX, 0.3, (0, 255, 255), 1)
 
                     if distance_list[-1] < max_distance and distance_list[-1]<min_distance:
@@ -272,20 +287,22 @@ class GraspObject():
                         cv2.circle(frame, (np.int32(xc), np.int32(yc)), 2, (255, 0, 0), 2, 8, 0)
 
                     
-                if found_count >= 15 and min_distance < 350:
+                if found_count >= 15 and min_distance < 190:
                     self.is_found_object = True
                     #cmd_vel = Twist()
-                    cv2.circle(frame, (np.int32(xc), np.int32(yc)), 3, (0,0,255), -1)      #将目标点显示出来
+                    cv2.circle(frame, (np.int32(xc), np.int32(yc)), 4, (0,0,255), -1)      #将目标点显示出来
                     #self.cmd_vel_pub.publish(cmd_vel)
                 else:
                     # if box is not moving
-                    if abs(xc - xc_prev) <= 50 and abs(yc - yc_prev) <= 50 and yc > 150 and yc < 370 and xc > 100 and xc < 540:
+                    if abs(xc - xc_prev) <= 50 and abs(yc - yc_prev) <= 50:
                         found_count = found_count + 1
                     else:
                         found_count = 0
 
+
             else:
                 found_count = 0
+
             xc_prev = xc
             yc_prev = yc
             cv2.imshow("win1", frame)

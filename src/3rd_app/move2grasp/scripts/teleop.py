@@ -53,7 +53,8 @@ def keyboardLoop():
     print "使用[jikl]控制机器人微小转动"
     print "按[g]抓取物体，按[f]放下物体"
     print "按[h]扔物体，按[b]机械臂复位" 
-    print "按[c]进入扫物块模式，按[=]退出"
+    print "按[c]进入左扫物块模式，按[v]进入右扫物块模式"
+    print "按[=]退出"
  
  
     #读取按键循环
@@ -99,10 +100,15 @@ def keyboardLoop():
             msg=String()
             msg.data='3'
             grasp_pub.publish(msg)
-        #扫物块模式,对应data为4
+        #左扫物块模式,对应data为4
         elif ch == 'c':
             msg=String()
             msg.data='4'
+            grasp_pub.publish(msg)
+        #右扫物块模式,对应data为5
+        elif ch == 'c':
+            msg=String()
+            msg.data='5'
             grasp_pub.publish(msg)
         # 位移
         elif ch == 'w':
