@@ -86,6 +86,7 @@ class Move2Grasp():
                     msg=String()
                     msg.data='0'
                     self.grasp_pub.publish(msg)
+                
 
 
     def move(self, goal):  

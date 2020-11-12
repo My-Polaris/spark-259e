@@ -137,6 +137,8 @@ class GraspObject():
             pos.x = 120
             pos.y = 0
             pos.z = 35
+            #发布停止气泵的命令
+            self.pub2.publish(0)
             self.pub1.publish(pos)
         # 扫物块模式,x是远近(越远数值越大),y是左右(左正右负),z是高度(越高数值越大)
         if msg.data=='4':
@@ -270,13 +272,13 @@ class GraspObject():
                     str_x = "x_mid: "+str(int(x_mid))
                     str_y = "y_mid: "+str(int(y_mid))
                     str_A = "Area: "+str(int(w*h))
-                    str_D = "dist: "+str(int(math.sqrt((320 - x_mid) ** 2 + (300 - y_mid) ** 2)))
+                    str_D = "dist: "+str(int(math.sqrt((340 - x_mid) ** 2 + (250 - y_mid) ** 2)))
                     #画图                    
                     frame = cv2.drawContours(frame,[contours[i]],0,(0,255,0),3)
-                    frame = cv2.putText(frame,str_x, (box[3][0],box[3][1]), cv2.FONT_HERSHEY_COMPLEX, 0.3, (0, 255, 255), 1)
-                    frame = cv2.putText(frame,str_y, (box[3][0],box[3][1]+10), cv2.FONT_HERSHEY_COMPLEX,0.3, (0, 255, 255), 1)
-                    frame = cv2.putText(frame,str_A, (box[1][0],box[1][1]+20), cv2.FONT_HERSHEY_COMPLEX, 0.3, (0, 255, 255), 1)
-                    frame = cv2.putText(frame,str_D, (box[3][0],box[3][1]+30), cv2.FONT_HERSHEY_COMPLEX, 0.3, (0, 255, 255), 1)
+                    frame = cv2.putText(frame,str_x, (int(x_mid),int(y_mid)), cv2.FONT_HERSHEY_COMPLEX, 0.3, (0, 255, 255), 1)
+                    frame = cv2.putText(frame,str_y, (int(x_mid),int(y_mid)+10), cv2.FONT_HERSHEY_COMPLEX,0.3, (0, 255, 255), 1)
+                    frame = cv2.putText(frame,str_A, (int(x_mid),int(y_mid)+20), cv2.FONT_HERSHEY_COMPLEX, 0.3, (0, 255, 255), 1)
+                    frame = cv2.putText(frame,str_D, (int(x_mid),int(y_mid)+30), cv2.FONT_HERSHEY_COMPLEX, 0.3, (0, 255, 255), 1)
 
                     #画四个点
                     #cv2.circle(frame, (np.int32(box[0][0]), np.int32(box[0][1])), 2, (255, 233, 0), 2, 8, 0)
@@ -299,7 +301,7 @@ class GraspObject():
                         cv2.circle(frame, (np.int32(xc), np.int32(yc)), 2, (255, 0, 0), 2, 8, 0)
 
                     
-                if found_count >= 15 and min_distance < 190:
+                if found_count >= 15 and min_distance < 250:
                     self.is_found_object = True
                     #cmd_vel = Twist()
                     cv2.circle(frame, (np.int32(xc), np.int32(yc)), 4, (0,0,255), -1)      #将目标点显示出来
