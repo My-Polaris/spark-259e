@@ -34,11 +34,11 @@ def keyboardLoop():
  
     #速度变量
     # 慢速
-    walk_vel_ = rospy.get_param('walk_vel', 0.2)
+    walk_vel_ = rospy.get_param('walk_vel', 0.1)
     # 快速
     run_vel_ = rospy.get_param('run_vel', 0.5)	#1.0
     # 慢转
-    yaw_rate_ = rospy.get_param('yaw_rate', 0.6)	#1
+    yaw_rate_ = rospy.get_param('yaw_rate', 0.3)	#1
     # 快转
     yaw_rate_run_ = rospy.get_param('yaw_rate_run', 3)	#1.5#1
     # max_tv*speed是最终的移速,max_rv*turn是最终的转速
@@ -65,18 +65,7 @@ def keyboardLoop():
     max_rv = 0
     #读取按键循环
     while not rospy.is_shutdown():
-        # # linux下读取键盘按键a
-        # fd = sys.stdin.fileno()
-        # old_settings = termios.tcgetattr(fd)
-		# #不产生回显效果
-        # old_settings[3] = old_settings[3] & ~termios.ICANON & ~termios.ECHO
-        # try :
-        #     tty.setraw( fd )
-        #     ch = sys.stdin.read( 1 )
-        # finally :
-        #     termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
-        # 抓取物体,对应data为1
         if keyboard.isPressAndWaitForRelease('g'):
             if can_grasp:
                 msg=String()
@@ -122,12 +111,12 @@ def keyboardLoop():
         if keyboard.isPress('w'):
             max_tv = run_vel_
             speed = 1
-            print "w"
+            #print "w"
 
         elif keyboard.isPress('s'):
             max_tv = run_vel_
             speed = -1
-            print "s"
+            #print "s"
 
         else:
             speed = 0 
@@ -135,39 +124,20 @@ def keyboardLoop():
         if keyboard.isPress('a'):
             max_rv = yaw_rate_run_
             turn = 1
-            print "a"
+            #print "a"
 
         elif keyboard.isPress('d'):
             max_rv = yaw_rate_run_
             turn = -1
-            print "d"
+            #print "d"
 
         else:
             turn = 0 
 
-        # elif ch == 'i':
-        #     max_tv = walk_vel_
-        #     speed = 1
-        #     turn = 0
-        # elif ch == 'k':
-        #     max_tv = walk_vel_
-        #     speed = -1
-        #     turn = 0
-        # elif ch == 'j':
-        #     max_rv = yaw_rate_
-        #     speed = 0
-        #     turn = 1
-        # elif ch == 'l':
-        #     max_rv = yaw_rate_
-        #     speed = 0
-        #     turn = -1
-        # elif ch == '=':
-        #     exit()
-        if keyboard.isPress(keyboard.Key.space):#按空格能立刻停止是因为这里
+        #shift 慢速模式
+        if keyboard.isPress(keyboard.Key.shift):
             max_tv = walk_vel_
             max_rv = yaw_rate_
-            speed = 0
-            turn = 0
  
         #发送消息
         cmd.linear.x = speed * max_tv

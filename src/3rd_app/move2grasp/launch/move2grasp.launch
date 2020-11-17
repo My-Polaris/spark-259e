@@ -43,7 +43,7 @@
   	</group>
 
 
-        <node pkg="move2grasp" type="move.py" name="move" />
-        <node pkg="move2grasp" type="grasp.py" name="grasp" />
+        <node pkg="move2grasp" type="move.py" name="move" launch-prefix="xterm -e" />
+        <node pkg="move2grasp" type="grasp.py" name="grasp" launch-prefix="xterm -e" />
 
 </launch>

@@ -81,7 +81,7 @@ class GraspObject():
                 rate.sleep()
                 times+=1
                 # 转一圈没有发现可抓取物体,退出抓取
-                if steps>=1:
+                if steps>=3:
                     #self.sub.unregister()
                     print("stop grasp\n")
                     detect_color_blue=False
@@ -203,7 +203,7 @@ class GraspObject():
         # 提起物体
         pos.x = 200  #160
         pos.y = 0
-        pos.z = 95  #55
+        pos.z = 110  #55
         self.pub1.publish(pos)
         r1.sleep()
 
@@ -242,8 +242,8 @@ class GraspObject():
             #mask = cv2.dilate(mask, None, iterations=2)
             mask = cv2.GaussianBlur(mask, (9,9), 0)                 #该函数用于图像的减噪过程
             # detect contour
-            cv2.imshow("win2", mask)                                #将去掉颜色的图像显示在win2这个窗口上
-            cv2.waitKey(1)                                          #功能是不断的刷新win2这个窗口，频率为delay
+            #cv2.imshow("win2", mask)                                #将去掉颜色的图像显示在win2这个窗口上
+            #cv2.waitKey(1)                                          #功能是不断的刷新win2这个窗口，频率为delay
             #if detect_color_blue :                                  #这个布尔变量表示 是否探测到符合的蓝色    
             _, contours, hier = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)      #第一个参数是带有参数的图像 第二个参数cv2.RETR_TREE是提取轮廓信息 第三个参数是指定轮廓的近似方法 
             if len(contours) > 0:    #len计算contour里面的元素个数                                    #第一个返回值 _是二值图（这里没用到） 第二个值counters是一个列表每个元素是（x,1,2）x是每个元素的边缘像素点的多少                    

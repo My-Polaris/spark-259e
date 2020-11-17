@@ -415,6 +415,12 @@ Visualization Manager:
   Tools:
     - Class: rviz/Interact
       Hide Inactive Objects: true
+    - Class: rviz/PublishPoint
+      Single click: true
+      Topic: /clicked_point
+    - Class: rviz/PublishPoint
+      Single click: true
+      Topic: /clicked_point_2
     - Class: rviz/MoveCamera
     - Class: rviz/Select
     - Class: rviz/FocusCamera
@@ -423,9 +429,6 @@ Visualization Manager:
       Topic: /initialpose
     - Class: rviz/SetGoal
       Topic: /move_base_simple/goal
-    - Class: rviz/PublishPoint
-      Single click: true
-      Topic: /clicked_point
   Value: true
   Views:
     Current:

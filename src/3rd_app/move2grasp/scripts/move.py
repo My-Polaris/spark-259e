@@ -17,7 +17,8 @@ class Move2Grasp():
  
         rospy.on_shutdown(self.shutdown)
         #订阅RVIZ上的点击事件
-	rospy.Subscriber('clicked_point', PointStamped, self.cp_callback)
+        rospy.Subscriber('clicked_point', PointStamped, self.cp_callback)
+        rospy.Subscriber('clicked_point_2', PointStamped, self.cp_callback_2)
         #订阅机械臂抓取状态
         rospy.Subscriber('/grasp_status', String, self.grasp_status_cp, queue_size=1)
         # Publisher to manually control the robot (e.g. to stop it)  
@@ -39,8 +40,20 @@ class Move2Grasp():
         rospy.loginfo("Connected to move base server")  
         rospy.loginfo("Starting navigation test")  
   
- 
+    def cp_callback_2(self,msg):
+            self.EndPose = msg 
+            print msg.point.x
+            print msg.point.y
+            print msg.point.z
+
     def cp_callback(self, msg):
+            # vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
+            # vel_msg = Twist()
+            # vel_msg.linear.x = 2
+            # vel_pub.publish(vel_msg)
+            # rospy.sleep(1)
+                
+                
             rospy.loginfo("POINT:%f,%f,%f", msg.point.x, msg.point.y, msg.point.z)
 
             # Intialize the waypoint goal  
@@ -71,73 +84,23 @@ class Move2Grasp():
                 msg.data='1'
                 self.grasp_pub.publish(msg)
 
-    # 使用CV检测物体       
-    def box_cb(self):
-        if found_count >= 15 and min_distance < 190:
-            self.is_found_object = True
-            global xc, yc, found_count
-            # stop function
-            filename = os.environ['HOME'] + "/thefile.txt"
-            file_pix = open(filename, 'r')
-            s = file_pix.read()
-            file_pix.close()
-            print(s)
-            arr=s.split()
-            a1=arr[0]
-            a2=arr[1]
-            a3=arr[2]
-            a4=arr[3]
-            a = [0]*2
-            b = [0]*2
-            a[0]=float(a1)
-            a[1]=float(a2)
-            b[0]=float(a3)
-            b[1]=float(a4)
-            print('k and b value:',a[0],a[1],b[0],b[1])
-            r1 = rospy.Rate(10)
-            r2 = rospy.Rate(10)
-            pos = position()
-            # 物体所在坐标+标定误差
-            pos.x = a[0] * yc + a[1]
-            pos.y = b[0] * xc + b[1]
-            pos.z = 20
-            # pos.z = 20
-            print("z = 20\n")
-            self.pub1.publish(pos)
-
-            self.pub2.publish(0)
-            r2.sleep()
-            r1.sleep()
-            pos.x = 120
-            pos.y = 0
-            pos.z = 50
-            #self.pub1.publish(pos)
-            r1.sleep()
-        return 'succeeded'
-        else:
-            pass
-
-
-
     def grasp_status_cp(self, msg):
             # 物体抓取成功,让机器人回起始点
             if msg.data=='1': 
+                rospy.sleep(5)
                 goal = MoveBaseGoal()
                 goal.target_pose.header.frame_id = 'map' 
                 goal.target_pose.header.stamp = rospy.Time.now() 
-                pose = Pose(Point(0.0,0.0,0.0), Quaternion(0.0, 0.0, 0.0, 5.0))
+                pose = Pose(Point(self.EndPose.point.x,self.EndPose.point.y,0), Quaternion(0.0, 0.0, 0.0, 5.0))
+                print
                 goal.target_pose.pose=pose  
                 status=self.move(goal)
                 #status=self.move(goal)
                 # 到达起始点,放下物体
                 if status==True:
-                    if self.box_cb():
-                        pass
-                    else:
-                        msg=String()
-                        msg.data='0'
-                        self.grasp_pub.publish(msg)
-                
+                    msg=String()
+                    msg.data='0'
+                    self.grasp_pub.publish(msg)
 
 
     def move(self, goal):  
@@ -147,7 +110,7 @@ class Move2Grasp():
  
             # Allow 1 minute to get there  
             # 设定1分钟的时间限制  
-            finished_within_time = self.move_base.wait_for_result(rospy.Duration(60))   
+            finished_within_time = self.move_base.wait_for_result(rospy.Duration(30))   
  
             # If we don't get there in time, abort the goal  
             # 如果一分钟之内没有到达，放弃目标  
