@@ -55,7 +55,7 @@ def keyboardLoop():
     print "使用[jikl]控制机器人微小转动"
     print "按[g]抓取物体，按[f]放下物体"
     print "按[h]扔物体，按[b]机械臂复位" 
-    print "按[c]进入左扫物块模式，按[v]进入右扫物块模式"
+    print "按[c]进入左扫物块模式，按[v]进入右扫物块模式，按[l]叠三层释放"
     print "按[=]退出"
  
     count = 0 
@@ -105,6 +105,11 @@ def keyboardLoop():
         elif keyboard.isPressAndWaitForRelease('v'):
             msg=String()
             msg.data='5'
+            grasp_pub.publish(msg)
+        #举到三层的位置
+        elif keyboard.isPressAndWaitForRelease('l'):
+            msg=String()
+            msg.data='6'
             grasp_pub.publish(msg)
         # 位移
         

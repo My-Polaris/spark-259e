@@ -155,6 +155,14 @@ class GraspObject():
             pos.y = -208
             pos.z = -118
             self.pub1.publish(pos)
+        #举到三层的位置
+        if msg.data=='6':
+            #右扫
+            pos = position()
+            pos.x = 160
+            pos.y = -208
+            pos.z = 170
+            self.pub1.publish(pos)
 
     # 执行抓取
     def grasp(self):
@@ -266,13 +274,13 @@ class GraspObject():
                     
                     size.append(w * h)        #将外接矩阵的面积放入这个列表之中                        
                     # 所有点到spark的距离
-                    distance_list.append(math.sqrt((320 - x_mid) ** 2 + (300 - y_mid) ** 2))
+                    distance_list.append(math.sqrt((340 - x_mid) ** 2 + (235 - y_mid) ** 2))
 
                     #信息
                     str_x = "x_mid: "+str(int(x_mid))
                     str_y = "y_mid: "+str(int(y_mid))
                     str_A = "Area: "+str(int(w*h))
-                    str_D = "dist: "+str(int(math.sqrt((340 - x_mid) ** 2 + (250 - y_mid) ** 2)))
+                    str_D = "dist: "+str(int(math.sqrt((340 - x_mid) ** 2 + (235 - y_mid) ** 2)))
                     #画图                    
                     frame = cv2.drawContours(frame,[contours[i]],0,(0,255,0),3)
                     frame = cv2.putText(frame,str_x, (int(x_mid),int(y_mid)), cv2.FONT_HERSHEY_COMPLEX, 0.3, (0, 255, 255), 1)
@@ -301,7 +309,7 @@ class GraspObject():
                         cv2.circle(frame, (np.int32(xc), np.int32(yc)), 2, (255, 0, 0), 2, 8, 0)
 
                     
-                if found_count >= 15 and min_distance < 250:
+                if found_count >= 15 and min_distance < 350:
                     self.is_found_object = True
                     #cmd_vel = Twist()
                     cv2.circle(frame, (np.int32(xc), np.int32(yc)), 4, (0,0,255), -1)      #将目标点显示出来
