@@ -169,9 +169,12 @@ class Move2Grasp():
                     self.grasp_pub.publish('3')
 
             if msg.data=='2':
+                rospy.sleep(5)
                 self.move_2(self.EndPose)
                 msg.data='0'
                 self.grasp_pub.publish(msg)
+                rospy.sleep(1)
+                self.grasp_pub.publish('3')
                 
 
     def move(self, goal):  
