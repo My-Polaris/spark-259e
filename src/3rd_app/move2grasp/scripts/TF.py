@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
 import rospy
 import tf
 import tf2_ros
@@ -8,11 +11,8 @@ from geometry_msgs.msg import Pose, Point, Quaternion, TransformStamped
 
 class RT():
 	def __init__(self):
-        #监听者
 		self.tf_listener = tf.TransformListener()
-        #这个发布者用来实时发布自身相对于“世界”的位置
 		self.tf_broadcaster = tf2_ros.TransformBroadcaster()
-        #这个发布者用来发布目标点相对于“世界”的位置
 		self.tf_staticBroadcaster = tf2_ros.StaticTransformBroadcaster()
 	
 	# return negative mean right
@@ -107,15 +107,15 @@ class RT():
 		(point, quaternion) = self.get_pq(from_frame, to_frame)
 		return self.pq2Pose(point, quaternion)
 
-	#用于迭代位置  将自己新的位置和新的姿态进行封装加上时间返回
-    def generate(self, from_frame, to_frame, point, quaternion):
-		t = TransformStamped()
-		t.header.stamp = rospy.Time.now()
-		t.header.frame_id = from_frame
-		t.child_frame_id = to_frame
-		t.transform.translation = point
-		t.transform.rotation = quaternion
-		return t
+	# #用于迭代位置  将自己新的位置和新的姿态进行封装加上时间返回
+    # def generate(self, from_frame, to_frame, point, quaternion):
+	# 	t = TransformStamped()
+	# 	t.header.stamp = rospy.Time.now()
+	# 	t.header.frame_id = from_frame
+	# 	t.child_frame_id = to_frame
+	# 	t.transform.translation = point
+	# 	t.transform.rotation = quaternion
+	# 	return t
 
     #该函数用来发布 自身 位置与姿态 的变化给“世界”
 	def publish_pq(self, from_frame, to_frame, point, quaternion):

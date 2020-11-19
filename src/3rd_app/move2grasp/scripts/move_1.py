@@ -9,20 +9,18 @@ from geometry_msgs.msg import Pose, Point, Quaternion, Twist, PointStamped
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal  
 from tf.transformations import quaternion_from_euler  
 from visualization_msgs.msg import Marker  
-import math
-from math import radians, pi
-from TF import RT
- 
+from math import radians, pi  
+from TF import RT  
+
 class Move2Grasp():  
     def __init__(self):  
         rospy.init_node('move2grasp', anonymous=False)  
-    
+        self.pub = rospy.Publisher('cmd_vel', Twist, queue_size=0)	
         rospy.on_shutdown(self.shutdown)
         #订阅RVIZ上的点击事件
         rospy.Subscriber('clicked_point', PointStamped, self.cp_callback)
         rospy.Subscriber('clicked_point_2', PointStamped, self.cp_callback_2)
-        rospy.Subscriber('clicked_point_3', PointStamped, self.cp_callback_3)
-
+        #rospy.Subscriber('clicked_point_3', PointStamped, self.cp_callback_3)
         #订阅机械臂抓取状态
         rospy.Subscriber('/grasp_status', String, self.grasp_status_cp, queue_size=1)
         # Publisher to manually control the robot (e.g. to stop it)  
@@ -30,6 +28,7 @@ class Move2Grasp():
         self.cmd_vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
         # 发布机械臂抓取指令 
         self.grasp_pub = rospy.Publisher('/grasp', String, queue_size=1)
+ 
         # Subscribe to the move_base action server  
         # 订阅move_base服务器的消息  
         self.move_base = actionlib.SimpleActionClient("move_base", MoveBaseAction)  
@@ -39,77 +38,46 @@ class Move2Grasp():
         # Wait 60 seconds for the action server to become available  
         # 等待move_base服务器建立  
         self.move_base.wait_for_server(rospy.Duration(60))  
-        
-        self.tf = RT()
+        self.rt = RF()
         rospy.loginfo("Connected to move base server")  
-        rospy.loginfo("Starting navigation test") 
-
-    def move_1(self,v_x,v_z):
-        cmd = Twist()
-        cmd.linear.x = v_x
-        cmd.angular.z = v_z
-        self.cmd_vel_pub.publish(cmd)
-
-    def move_2(self,msg):
-            #获取初始位置
-        #    self.initial_pose = PoseWithCovarianceStamped()    
-            print "hahhaha"
-            dest = msg 
-            print dest
-            while True:
-                pose = self.tf.get_pose("map", "base_link")
-                print "hahah"
-                print pose 
-                yaw = self.tf.yawBetweenPoseAndPoint(pose, dest.point)
-
-                delta_x = dest.point.x - pose.position.x
-                delta_y = dest.point.y - pose.position.y
-                distance = math.sqrt(delta_x ** 2 + delta_y ** 2)
-
-                if distance < 0.05:
-                    self.move_1(0,0)
-                    break
-                elif distance < 0.3:
-                    if abs(yaw) < self.tf.angel2Radian(90):
-                        speed = -yaw * 1
-                        if speed > 1:
-                            speed = 1
-                        self.move_1(0.1, speed)
-                    else:
-                        speed = -self.tf.standardRadian(yaw - pi) * 10
-                        if speed > 1:
-                            speed = 1
-                        self.move_1(-0.1, speed)
-                else:
-                    if abs(yaw) < self.tf.angel2Radian(60):
-                        speed = -yaw * 10
-                        if speed > 2:
-                            speed = 2
-                        self.move_1(0.4, speed)
-                    else:
-                        if yaw < 0:
-                            self.move_1(0, 1.5)
-                        else:
-                            self.move_1(0, -1.5)
-
-    def get_pose(self,msg):
-        return (msg.pose.x,msg.pose.y,msg.pose.z)
-
-    def get_zitai(self,msg):
-        return (msg.quaternion.x,msg.quaternion.y,msg.quaternion.z,msg.quaternion.w)
-
-    def cp_callback_3(self,msg):
-            self.move_2(msg)
-            msg = String()
-            msg.data = '7'
-            self.grasp_pub.publish(msg)
-            
-
+        rospy.loginfo("Starting navigation test")  
+  
     def cp_callback_2(self,msg):
             self.EndPose = msg 
             print msg.point.x
             print msg.point.y
             print msg.point.z
+    
+    def get_pose(self):
+        pose = (self.initial_pose.pose.pose.position.x , initial_pose.pose.pose.position.y,0)
+        return pose
+        
+    def get_qua(self):
+        qua = (self.initial_pose.pose.quaternion.x,self.initial_pose.pose.quaternion.y,self.initial_pose.pose.quaternion.z,self.initial_pose.pose.quaternion.w)
+        return qua 
+
+    def cp_callback_3(self,msg) :
+        #获取初始位置
+        self.initial_pose = PoseWithCovarianceStamped() 
+        #rt
+        pose = self.get_pose()
+        qua = self.get_qua()
+        deta_x = pose.x - msg.pose.x 
+        deta_y = pose.y - msg.pose.y 
+        yaw_1 = rt.angelFromXY(deta_x,deta_y)
+        yaw_2 = qua.z
+        deta_y = yaw_1+yaw_2
+        time = abs(deta_y) / 1 
+        cmd = cmd = Twist()
+
+        cmd.linear.x = 0 
+        if yaw_1 > 0 :
+            cmd.angular.z=1
+        else:
+            cmd.angular.z=-1
+        self.pub.publish(cmd)
+        print "move"
+        rospy.sleep(time)
 
     def cp_callback(self, msg):
             # vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=1)
@@ -117,8 +85,7 @@ class Move2Grasp():
             # vel_msg.linear.x = 2
             # vel_pub.publish(vel_msg)
             # rospy.sleep(1)
-                
-                
+            
             rospy.loginfo("POINT:%f,%f,%f", msg.point.x, msg.point.y, msg.point.z)
 
             # Intialize the waypoint goal  
@@ -157,6 +124,7 @@ class Move2Grasp():
                 goal.target_pose.header.frame_id = 'map' 
                 goal.target_pose.header.stamp = rospy.Time.now() 
                 pose = Pose(Point(self.EndPose.point.x,self.EndPose.point.y,0), Quaternion(0.0, 0.0, 0.0, 5.0))
+                print
                 goal.target_pose.pose=pose  
                 status=self.move(goal)
                 #status=self.move(goal)
@@ -165,14 +133,9 @@ class Move2Grasp():
                     msg=String()
                     msg.data='0'
                     self.grasp_pub.publish(msg)
-                    rospy.sleep(1)
-                    self.grasp_pub.publish('3')
 
-            if msg.data=='2':
-                self.move_2(self.EndPose)
-                msg.data='0'
-                self.grasp_pub.publish(msg)
-                
+
+                    +
 
     def move(self, goal):  
             # Send the goal pose to the MoveBaseAction server  
@@ -206,7 +169,9 @@ class Move2Grasp():
         # Stop the robot  
         self.cmd_vel_pub.publish(Twist())  
         rospy.sleep(1)  
- 
+
+     
+
 if __name__ == '__main__':  
     try:  
         Move2Grasp()

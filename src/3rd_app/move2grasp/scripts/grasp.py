@@ -69,7 +69,7 @@ class GraspObject():
     def grasp_cp(self, msg):
         global detect_color_blue
         rospy.loginfo("recvice grasp command:%s",msg.data)
-        if msg.data == '1':
+        if msg.data == '1' or msg.data =='7':
             # 订阅摄像头话题,对图像信息进行处理
             #self.sub = rospy.Subscriber("/camera/rgb/image_raw", Image, self.image_cb, queue_size=1)
             detect_color_blue=True
@@ -101,7 +101,10 @@ class GraspObject():
             self.grasp()
             status=String()
             status.data='1'
+            if msg=='7':
+                status.data = '2'
             self.grasp_status_pub.publish(status) 
+
         if msg.data=='0':
             # 放下物体
             self.is_found_object = False
