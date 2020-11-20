@@ -101,7 +101,7 @@ class GraspObject():
             self.grasp()
             status=String()
             status.data='1'
-            if msg=='7':
+            if msg.data == '7':
                 status.data = '2'
             self.grasp_status_pub.publish(status) 
 

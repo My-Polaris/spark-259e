@@ -36,7 +36,7 @@ void position_write_callback(const swiftpro::position& msg)
 	sprintf(x, "%.2f", msg.x);
 	sprintf(y, "%.2f", msg.y);
 	sprintf(z, "%.2f", msg.z);
-	Gcode = (std::string)"G0 X" + x + " Y" + y + " Z" + z + " F100000" + "\r\n";
+	Gcode = (std::string)"G0 X" + x + " Y" + y + " Z" + z + " F1000000" + "\r\n";
 	ROS_INFO("%s", Gcode.c_str());
 	_serial.write(Gcode.c_str());
 	result.data = _serial.read(_serial.available());

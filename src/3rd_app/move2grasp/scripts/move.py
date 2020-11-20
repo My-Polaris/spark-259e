@@ -54,9 +54,9 @@ class Move2Grasp():
             #获取初始位置
         #    self.initial_pose = PoseWithCovarianceStamped()    
             print "hahhaha"
-            dest = msg 
-            print dest
+            #print dest
             while True:
+                dest = msg 
                 pose = self.tf.get_pose("map", "base_link")
                 print "hahah"
                 print pose 
@@ -151,8 +151,9 @@ class Move2Grasp():
 
     def grasp_status_cp(self, msg):
             # 物体抓取成功,让机器人回起始点
+            print msg.data 
             if msg.data=='1': 
-                rospy.sleep(5)
+                rospy.sleep(3)
                 goal = MoveBaseGoal()
                 goal.target_pose.header.frame_id = 'map' 
                 goal.target_pose.header.stamp = rospy.Time.now() 
@@ -169,8 +170,9 @@ class Move2Grasp():
                     self.grasp_pub.publish('3')
 
             if msg.data=='2':
-                rospy.sleep(5)
+                rospy.sleep(3)
                 self.move_2(self.EndPose)
+                print self.EndPose 
                 msg.data='0'
                 self.grasp_pub.publish(msg)
                 rospy.sleep(1)
