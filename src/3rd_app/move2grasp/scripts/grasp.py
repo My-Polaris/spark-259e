@@ -160,10 +160,9 @@ class GraspObject():
             self.pub1.publish(pos)
         #举到三层的位置
         if msg.data=='6':
-            #右扫
             pos = position()
-            pos.x = 160
-            pos.y = -208
+            pos.x = 213
+            pos.y = -4
             pos.z = 170
             self.pub1.publish(pos)
 
